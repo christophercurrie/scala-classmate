@@ -7,6 +7,8 @@
 \*                                                                      */
 package org.fizmo.classmate.scala
 
+import scala.io.Codec
+
 object ByteCodecs {
 
   def avoidZero(src: Array[Byte]): Array[Byte] = {
@@ -212,5 +214,21 @@ object ByteCodecs {
   def decode(xs: Array[Byte]): Int = {
     val len = regenerateZero(xs)
     decode7to8(xs, len)
+  }
+
+  /**
+   * Decode string s and returns the decoded length as per [[#decode(Array[Byte]):Int]]
+   * This method is designed to take the string value of the [[scala.reflect.ScalaSignature]] annotation
+   * (or the concatenated strings of the [[scala.reflect.ScalaLongSignature]] annotation.
+   * It assumes that the conversion from (0xc0 0xff) to (0x00) has already been done by JVM reflection,
+   * so that the bytes UTF-8 encoding only needs to be decremented by one (mod 0x7f)
+   */
+  def decode(s: String): Array[Byte] = {
+    val encoded = Codec.toUTF8(s)
+    for (i <- 0 until encoded.length) {
+      encoded(i) = ((encoded(i) - 1) & 0x7f).toByte
+    }
+    val len = ByteCodecs.decode7to8(encoded, encoded.length)
+    encoded take len
   }
 }

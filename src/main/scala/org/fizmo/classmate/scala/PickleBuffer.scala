@@ -1,16 +1,28 @@
 package org.fizmo.classmate.scala
 
-class PickleBuffer(bytes: Array[Byte]) {
+import java.nio.ByteBuffer
 
-  private var _index = 0
+class PickleBuffer(buffer: ByteBuffer)
+{
+  def this(buffer: Seq[Byte]) = this(ByteBuffer.wrap(buffer.toArray).asReadOnlyBuffer())
 
-  def peekByte() = bytes(_index)
+  def position: Int = buffer.position()
 
-  def readByte(): Byte = {
-    val b = bytes(_index); _index += 1; b
+  def position_=(pos: Int): Unit = buffer.position(pos)
+
+  def peekByte(): Byte = buffer.get(buffer.position())
+
+  def readByte(): Byte = buffer.get()
+
+  def readNatural(): Int = {
+    val l = readLongNatural()
+    if (l < Int.MinValue || Int.MaxValue < l) {
+      throw new IllegalStateException()
+    }
+    l.toInt
   }
 
-  def readNatural(): Long = {
+  def readLongNatural(): Long = {
     var b = 0L
     var x = 0L
     do {

@@ -117,14 +117,12 @@ case class UnknownEntry(tag: Byte, length: Int, data: Seq[Byte]) extends Entry
 case class TermName(name: String) extends Entry
 {
   val tag = TERMname
-  override def toString = name
 }
 
 // *                  | 2 TYPENAME len_Nat NameInfo
 case class TypeName(name: String) extends Entry
 {
   val tag = TYPEname
-  override def toString = name
 }
 
 // *                  | 3 NONEsym len_Nat
@@ -132,31 +130,31 @@ case class NoneSymbolEntry() extends Entry
 {
   val tag = NONEsym
   override val isSymbol = true
-  override def toString = "NoneSymbol"
 }
 
 //*                  | 4 TYPEsym len_Nat SymbolInfo
 case class TypeEntry(symbolInfo: SymbolInfo) extends Entry {
   val tag = TYPEsym
   override val isSymbol = true
-  override def toString = "type " + symbolInfo.nameRef
 }
 
 //*                  | 5 ALIASsym len_Nat SymbolInfo
+case class AliasEntry(symbolInfo: SymbolInfo) extends Entry {
+  val tag = ALIASsym
+  override val isSymbol = true
+}
 
 //*                  | 6 CLASSsym len_Nat SymbolInfo [thistype_Ref]
 case class ClassEntry(symbolInfo: SymbolInfo, thisRef: Option[Int]) extends Entry
 {
   val tag = CLASSsym
   override val isSymbol = true
-  override def toString = "class " + symbolInfo.nameRef
 }
 
 case class AmbiguousClassEntry(symbolInfo: SymbolInfo) extends Entry
 {
   val tag = CLASSsym
   override val isSymbol = true
-  override def toString = "ambiguous class " + symbolInfo.nameRef
 }
 
 //*                  | 7 MODULEsym len_Nat SymbolInfo
@@ -164,28 +162,30 @@ case class ModuleEntry(symbolInfo: SymbolInfo) extends Entry
 {
   val tag = MODULEsym
   override val isSymbol = true
-  override def toString = "module " + symbolInfo.nameRef
 }
 
 //*                  | 8 VALsym len_Nat [defaultGetter_Ref /* no longer needed*/] SymbolInfo [alias_Ref]
+case class ValEntry(symbolInfo: SymbolInfo, aliasRef: Option[Int]) extends Entry
+{
+  val tag = VALsym
+  override val isSymbol = true
+}
+
 case class AmbiguousValEntry(bytes: Seq[Byte]) extends Entry {
   val tag = VALsym
   override val isSymbol = true
-  override def toString = "ambiguous val " + bytes
 }
 
 //*                  | 9 EXTref len_Nat name_Ref [owner_Ref]
 case class ExtRefEntry(nameRef: Int, ownerRef: Option[Int]) extends Entry
 {
   val tag = EXTref
-  override val toString = "extref " + nameRef
 }
 
 //*                  | 10 EXTMODCLASSref len_Nat name_Ref [owner_Ref]
 case class ExtModClassRefEntry(nameRef: Int, ownerRef: Option[Int]) extends Entry
 {
   val tag = EXTMODCLASSref
-  override val toString = "extmodclassref " + nameRef
 }
 
 //*                  | 11 NOtpe len_Nat
@@ -193,7 +193,6 @@ case class ExtModClassRefEntry(nameRef: Int, ownerRef: Option[Int]) extends Entr
 case class NoPrefixEntry() extends Entry
 {
   val tag = NOtpe
-  override def toString = "noprefix"
 }
 
 
@@ -201,24 +200,26 @@ case class NoPrefixEntry() extends Entry
 case class ThisTypeEntry(symRef: Int) extends Entry
 {
   val tag = THIStpe
-  override val toString = "thistype " + symRef
 }
 
 //*                  | 14 SINGLEtpe len_Nat type_Ref sym_Ref
+case class SingleEntry(typeRef: Int, symRef: Int) extends Entry
+{
+  val tag = SINGLEtpe
+}
+
 //*                  | 15 CONSTANTtpe len_Nat constant_Ref
 
 //*                  | 16 TYPEREFtpe len_Nat type_Ref sym_Ref {targ_Ref}
 case class TypeRefEntry(typeRef: Int, symRef: Int, targRefs: Seq[Int]) extends Entry
 {
   val tag = TYPEREFtpe
-  override val toString = "typeref " + typeRef
 }
 
 //*                  | 17 TYPEBOUNDStpe len_Nat tpe_Ref tpe_Ref
 case class TypeBoundsEntry(tpeRefA: Int, tpeRefB: Int) extends Entry
 {
   val tag = TYPEBOUNDStpe
-  override val toString = "typebounds " + tpeRefA + " " + tpeRefB
 }
 
 //*                  | 18 REFINEDtpe len_Nat classsym_Ref {tpe_Ref}
@@ -226,21 +227,18 @@ case class TypeBoundsEntry(tpeRefA: Int, tpeRefB: Int) extends Entry
 case class ClassInfoEntry(classSymRef: Int, tpeRefs: Seq[Int]) extends Entry
 {
   val tag = CLASSINFOtpe
-  override val toString = "classinfo " + classSymRef
 }
 
 //*                  | 20 METHODtpe len_Nat tpe_Ref {sym_Ref}
 case class MethodEntry(tpeRef: Int, symRefs: Seq[Int]) extends Entry
 {
   val tag = METHODtpe
-  override val toString = "method " + tpeRef
 }
 
 //*                  | 21 POLYTtpe len_Nat tpe_Ref {sym_Ref}
 case class PolyEntry(tpeRef: Int, symRefs: Seq[Int]) extends Entry
 {
   val tag = POLYtpe
-  override val toString = "classinfo " + tpeRef
 }
 
 //*                  | 22 IMPLICITMETHODtpe len_Nat tpe_Ref {sym_Ref} /* no longer needed */
@@ -254,12 +252,29 @@ case class PolyEntry(tpeRef: Int, symRefs: Seq[Int]) extends Entry
 //*                  | 30 LITERALlong len_Nat value_Long
 //*                  | 31 LITERALfloat len_Nat value_Long
 //*                  | 32 LITERALdouble len_Nat value_Long
+
 //*                  | 33 LITERALstring len_Nat name_Ref
+case class LiteralStringEntry(nameRef: Int) extends Entry
+{
+  val tag = LITERALstring
+}
+
 //*                  | 34 LITERALnull len_Nat
 //*                  | 35 LITERALclass len_Nat tpe_Ref
 //*                  | 36 LITERALenum len_Nat sym_Ref
+
 //*                  | 40 SYMANNOT len_Nat sym_Ref AnnotInfoBody
+case class SymAnnotEntry(symRef: Int, annotInfo: AnnotInfoBody) extends Entry
+{
+  val tag = SYMANNOT
+}
+
 //*                  | 41 CHILDREN len_Nat sym_Ref {sym_Ref}
+case class ChildrenEntry(syms: Seq[Int]) extends Entry
+{
+  val tag = CHILDREN
+}
+
 //*                  | 42 ANNOTATEDtpe len_Nat [sym_Ref /* no longer needed */] tpe_Ref {annotinfo_Ref}
 //*                  | 43 ANNOTINFO len_Nat AnnotInfoBody
 //*                  | 44 ANNOTARGARRAY len_Nat {constAnnotArg_Ref}

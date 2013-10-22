@@ -11,5 +11,6 @@ unmanagedSourceDirectories in Compile <+= (sourceDirectory in Compile, scalaBina
 scalacOptions ++= Seq("-deprecation")
 
 libraryDependencies ++= Seq(
-    "com.fasterxml" % "classmate" % "0.8.0"
+    // "com.fasterxml" % "classmate" % "0.8.0"
+    "org.scalatest" %% "scalatest" % "2.0.M5b" % "test"
 )

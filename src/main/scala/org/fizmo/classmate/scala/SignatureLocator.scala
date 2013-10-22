@@ -3,9 +3,10 @@ package org.fizmo.classmate.scala
 import scala.reflect.{ScalaLongSignature, ScalaSignature}
 import Preconditions._
 import scala.annotation.tailrec
+import scala.io.Codec
 
 class SignatureLocator {
-  def locate(cls: Class[_]): (String, Seq[Class[_]]) = {
+  def locate(cls: Class[_]): (Array[Byte], Seq[Class[_]]) = {
     notNull(cls)
 
     @tailrec
@@ -22,6 +23,7 @@ class SignatureLocator {
       _locate(xs.head.getEnclosingClass +: xs)
     }
 
-    _locate(Seq(cls))
+    val location = _locate(Seq(cls))
+    (ByteCodecs.decode(location._1), location._2)
   }
 }
