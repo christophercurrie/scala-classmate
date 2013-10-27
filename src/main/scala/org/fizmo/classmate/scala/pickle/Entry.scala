@@ -165,7 +165,7 @@ case class ModuleEntry(symbolInfo: SymbolInfo) extends Entry
 }
 
 //*                  | 8 VALsym len_Nat [defaultGetter_Ref /* no longer needed*/] SymbolInfo [alias_Ref]
-case class ValEntry(symbolInfo: SymbolInfo, aliasRef: Option[Int]) extends Entry
+case class ValEntry(defaultGetterRef: Option[Int], symbolInfo: SymbolInfo, aliasRef: Option[Int]) extends Entry
 {
   val tag = VALsym
   override val isSymbol = true

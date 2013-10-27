@@ -41,7 +41,7 @@ class ParsedSignature(buffer: PickleBuffer) {
       case ALIASsym => AliasEntry(readSymbolInfo(length))
       case MODULEsym => ModuleEntry(readSymbolInfo(length))
       //case VALsym => AmbiguousValEntry(for (i <- 0 until length) yield readByte())
-      case VALsym => ValEntry(readSymbolInfo(length), if (done()) None else Some(buffer.readNatural()))
+      case VALsym => ValEntry(None, readSymbolInfo(length), if (done()) None else Some(buffer.readNatural()))
       case EXTref => ExtRefEntry(buffer.readNatural(), if (done()) None else Some(buffer.readNatural()))
       case CLASSsym => {
         // CLASSsym entries are ambiguous, as there are two optional fields

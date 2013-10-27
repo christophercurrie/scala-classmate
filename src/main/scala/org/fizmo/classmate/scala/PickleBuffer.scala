@@ -1,6 +1,7 @@
 package org.fizmo.classmate.scala
 
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 
 class PickleBuffer(buffer: ByteBuffer)
 {
@@ -12,7 +13,13 @@ class PickleBuffer(buffer: ByteBuffer)
 
   def peekByte(): Byte = buffer.get(buffer.position())
 
+  def byteAt(index: Int) = buffer.get(index)
+
   def readByte(): Byte = buffer.get()
+
+  def readBytes(b: Array[Byte], offset: Int, length: Int) = buffer.get(b, offset, length)
+
+  def readBytes(b: Array[Byte]) = buffer.get(b)
 
   def readNatural(): Int = {
     val l = readLongNatural()
@@ -41,5 +48,11 @@ class PickleBuffer(buffer: ByteBuffer)
     }
     val leading = 64 - (len << 3)
     x << leading >> leading
+  }
+
+  def readName(len: Int): String = {
+    val bytes = new Array[Byte](len)
+    readBytes(bytes)
+    new String(bytes, StandardCharsets.UTF_8)
   }
 }
